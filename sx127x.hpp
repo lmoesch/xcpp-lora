@@ -34,7 +34,7 @@ public:
 
         PaConfig = 0x09,
 
-    }
+    };
 
 
     // -- Common Registers -----------------------------------------------------
@@ -65,7 +65,7 @@ public:
         FreqSynthRX = Bit2,
         RecvCont = Bit2 | Bit0,
         RecvSingle = Bit2 | Bit1,
-        ChnActvDetect = Bit 2 | Bit 1 | Bit0 
+        ChnActvDetect = Bit2 | Bit1 | Bit0 
     };
     typedef xpcc::Configuration<RegOpMode_t, Mode, 0b111> Mode_t;
 
@@ -95,8 +95,48 @@ public:
 
     // --
 
+};
 
-}
-}
+struct SX127x_conf 
+{
+    uint8_t maxRxBuffer;
+    uint8_t maxTxBuffer;
+};
+
+/**
+ * Driver for SX1276/7/8 based FSK/OOK, LoRa™ modules.
+ *
+ * Nice description.
+ *
+ * @tparam	SpiMaster	SpiMaster interface
+ * @tparam	Cs			Chip-select pin
+ *
+ * @author	Lucas Mösch
+ * @ingroup ???
+ */
+template <typename SpiMaster, typename Cs, typename SX127x_conf>
+class SX127x : public sx127x, public xpcc::SpiDevice<SpiMaster>, protected xpcc::NestedResumable<3>
+{
+public:
+	SX127x();
+
+	/// 
+	xpcc::ResumableResult<void>
+	initialize();
+
+    xpcc::ResumableResult<void>
+    writeReg(RegAddr addr, uint8_t *data, uint8_t nbBytes);
+
+    xpcc::ResumableResult<void>
+    readReg(RegAddr addr, uint8_t *data, uint8_t nbBytes);
+
+private:
+    uint8_t rxBuffer[SX127x_conf.maxRxBuffer];
+    uint8_t txBuffer[SX127x_conf.maxTxBuffer];
+
+    RegOpMode_t operationMode;
+};
+
+} // Namespace xpcc
 
 #endif // XPCC_SX127x_HPP
