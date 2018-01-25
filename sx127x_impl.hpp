@@ -3,7 +3,7 @@ namespace xpcc
 
 
 template <typename SpiMaster, typename Cs>
-SX127x<SpiMaster, Cs, SX127x_conf>::SX127x()
+SX127x<SpiMaster, Cs>::SX127x()
 {
     
 }
@@ -12,7 +12,7 @@ SX127x<SpiMaster, Cs, SX127x_conf>::SX127x()
 
 template <typename SpiMaster, typename Cs>
 ResumableResult<void>
-SX127x<SpiMaster, Cs, SX127x_conf>::initialize()
+SX127x<SpiMaster, Cs>::initialize()
 {
     RF_BEGIN();
 
@@ -25,7 +25,7 @@ SX127x<SpiMaster, Cs, SX127x_conf>::initialize()
 
 template <typename SpiMaster, typename Cs>
 ResumableResult<void>
-SX127x<SpiMaster, Cs, SX127x_conf>::write(RegAddr addr, uint8_t *data, uint8_t nbBytes)
+SX127x<SpiMaster, Cs>::write(uint8_t addr, uint8_t *data, uint8_t nbBytes)
 {
     RF_BEGIN();
 
@@ -36,7 +36,7 @@ SX127x<SpiMaster, Cs, SX127x_conf>::write(RegAddr addr, uint8_t *data, uint8_t n
 
     Cs::reset();
 
-    RF_CALL(SpiMaster::transfer(buffer, nullptr, 1));
+    RF_CALL(SpiMaster::transfer(firstByte, nullptr, 1));
     RF_CALL(SpiMaster::transfer(data, nullptr, nbBytes));
 
 	if (this->releaseMaster())
@@ -49,7 +49,7 @@ SX127x<SpiMaster, Cs, SX127x_conf>::write(RegAddr addr, uint8_t *data, uint8_t n
 
 template <typename SpiMaster, typename Cs>
 ResumableResult<void>
-SX127x<SpiMaster, Cs, SX127x_conf>::read(RegAddr addr, uint8_t *data, uint8_t nbBytes)
+SX127x<SpiMaster, Cs>::read(uint8_t addr, uint8_t *data, uint8_t nbBytes)
 {
     RF_BEGIN();
 

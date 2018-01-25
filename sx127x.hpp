@@ -17,7 +17,7 @@
 namespace xpcc
 {
 
-struct sc127x
+struct sx127x
 {
 public:
     enum class
@@ -126,10 +126,10 @@ public:
 	initialize();
 
     xpcc::ResumableResult<void>
-    write(RegAddr addr, uint8_t *data, uint8_t nbBytes);
+    write(uint8_t addr, uint8_t *data, uint8_t nbBytes);
 
     xpcc::ResumableResult<void>
-    read(RegAddr addr, uint8_t *data, uint8_t nbBytes);
+    read(uint8_t addr, uint8_t *data, uint8_t nbBytes);
 
 private:
     uint8_t firstByte;
