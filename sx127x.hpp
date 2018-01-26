@@ -21,7 +21,15 @@ struct sx127x
 {
 public:
     enum class
-    RegAddr : uint8_t
+    RegAccess : uint8_t
+    {
+        /// Defines read (0) or write (1) access
+        wnr = Bit7
+    };
+    XPCC_FLAGS8(RegAccess)
+
+    enum class 
+    Address : uint8_t
     {
         Fifo = 0x00,
 
@@ -35,8 +43,8 @@ public:
         // -- RF Block Registers -----------------------------------------------
 
         PaConfig = 0x09,
-
     };
+    typedef xpcc::Configuration<RegAccess_t, Address, 0x7F> Address_t;
 
 
     // -- Common Registers -----------------------------------------------------
@@ -125,15 +133,17 @@ public:
 	xpcc::ResumableResult<void>
 	initialize();
 
-    xpcc::ResumableResult<void>
-    write(uint8_t addr, uint8_t *data, uint8_t nbBytes);
+        xpcc::ResumableResult<void>
+    write(Address addr, uint8_t data);
 
     xpcc::ResumableResult<void>
-    read(uint8_t addr, uint8_t *data, uint8_t nbBytes);
+    write(Address addr, uint8_t *data, uint8_t nbBytes);
+
+    xpcc::ResumableResult<void>
+    read(Address addr, uint8_t *data, uint8_t nbBytes);
 
 private:
-    uint8_t firstByte;
-
+    RegAccess_t regAccess;
     RegOpMode_t operationMode;
 };
 } // Namespace xpcc
