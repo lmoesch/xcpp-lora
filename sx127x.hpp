@@ -11,17 +11,24 @@
 #define XPCC_SX127x_HPP
 
 #include <xpcc/architecture/interface/spi_device.hpp>
-#include <xpcc/architecture/driver/accessor.hpp>
 #include <xpcc/processing.hpp>
 
 namespace xpcc
 {
 
-struct sc127x
+struct sx127x
 {
 public:
     enum class
-    RegAddr : uint8_t
+    RegAccess : uint8_t
+    {
+        /// Defines read (0) or write (1) access
+        wnr = Bit7
+    };
+    XPCC_FLAGS8(RegAccess)
+
+    enum class 
+    Address : uint8_t
     {
         Fifo = 0x00,
 
@@ -35,9 +42,8 @@ public:
         // -- RF Block Registers -----------------------------------------------
 
         PaConfig = 0x09,
-
     };
-
+    typedef xpcc::Configuration<RegAccess_t, Address, 0x7F> Address_t;
 
     // -- Common Registers -----------------------------------------------------
 
@@ -97,11 +103,11 @@ public:
 
     // --
 
-};
-
-struct SX127x_conf 
-{
-    uint8_t maxBuffer;
+    // -- Register list --------------------------------------------------------
+    union Shared {
+        uint8_t value;
+        RegOpMode_t regOpMode;       
+    };
 };
 
 /**
@@ -125,16 +131,33 @@ public:
 	xpcc::ResumableResult<void>
 	initialize();
 
-    xpcc::ResumableResult<void>
-    write(RegAddr addr, uint8_t *data, uint8_t nbBytes);
+    // -- Basic I/O ------------------------------------------------------------
 
     xpcc::ResumableResult<void>
-    read(RegAddr addr, uint8_t *data, uint8_t nbBytes);
+    write(Address addr, uint8_t data);
+
+    xpcc::ResumableResult<void>
+    write(Address addr, uint8_t *data, uint8_t nbBytes);
+
+    xpcc::ResumableResult<void>
+    read(Address addr, uint8_t *data, uint8_t nbBytes);
+
+    // -- Advanced I/O ---------------------------------------------------------
+    xpcc::ResumableResult<void>
+    setLora();
+
+    /*xpcc::ResumableResult<void>
+    setFSK();
+
+    xpcc::ResumableResult<void>
+    setLowFrequencyMode();
+
+    xpcc::ResumableResult<void>
+    setHighFrequencyMode();*/
 
 private:
-    uint8_t firstByte;
-
-    RegOpMode_t operationMode;
+    RegAccess_t regAccess;
+    Shared _shared = {0x00};
 };
 } // Namespace xpcc
 
