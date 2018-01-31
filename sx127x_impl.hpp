@@ -45,16 +45,24 @@ SX127x<SpiMaster, Cs>::write(Address addr, uint8_t data)
     RF_WAIT_UNTIL(this->acquireMaster());
 
     // for write access a '1' is followed by the address
+<<<<<<< HEAD
     regAccess.set(RegAccess::wnr);
     Address_t::set(regAccess, addr);
 
     SpiMaster::setDataMode(SpiMaster::DataMode::Mode0);
     SpiMaster::setDataOrder(SpiMaster::DataOrder::MsbFirst);
+=======
+    regAccess |= RegAccess::wnr;
+    Address_t::set(regAccess, addr);
+
+>>>>>>> ab7826630a3154ef05ce6dbfee927579dcb5afca
 
     Cs::reset();
 
     RF_CALL(SpiMaster::transfer(regAccess.value));
     RF_CALL(SpiMaster::transfer(data));
+<<<<<<< HEAD
+=======
 
 	if (this->releaseMaster())
 		Cs::set();
@@ -73,15 +81,53 @@ SX127x<SpiMaster, Cs>::write(Address addr, uint8_t *data, uint8_t nbBytes)
     RF_WAIT_UNTIL(this->acquireMaster());
 
     // for write access a '1' is followed by the address
+    regAccess |= RegAccess::wnr;
+    Address_t::set(regAccess, addr);
+
+
+    Cs::reset();
+
+    RF_CALL(SpiMaster::transfer(regAccess.value));
+    RF_CALL(SpiMaster::transfer(data, nullptr, nbBytes));
+>>>>>>> ab7826630a3154ef05ce6dbfee927579dcb5afca
+
+	if (this->releaseMaster())
+		Cs::set();
+
+    RF_END();
+}
+
+// ----------------------------------------------------------------------------
+
+template <typename SpiMaster, typename Cs>
+ResumableResult<void>
+<<<<<<< HEAD
+SX127x<SpiMaster, Cs>::write(Address addr, uint8_t *data, uint8_t nbBytes)
+=======
+SX127x<SpiMaster, Cs>::read(Address addr, uint8_t *data, uint8_t nbBytes)
+>>>>>>> ab7826630a3154ef05ce6dbfee927579dcb5afca
+{
+    RF_BEGIN();
+
+    RF_WAIT_UNTIL(this->acquireMaster());
+
+<<<<<<< HEAD
+    // for write access a '1' is followed by the address
     regAccess.set(RegAccess::wnr);
     Address_t::set(regAccess, addr);
 
     SpiMaster::setDataMode(SpiMaster::DataMode::Mode0);
     SpiMaster::setDataOrder(SpiMaster::DataOrder::MsbFirst);
+=======
+    regAccess &= ~RegAccess::wnr;
+    Address_t::set(regAccess, addr);
+
+>>>>>>> ab7826630a3154ef05ce6dbfee927579dcb5afca
 
     Cs::reset();
 
     RF_CALL(SpiMaster::transfer(regAccess.value));
+<<<<<<< HEAD
     RF_CALL(SpiMaster::transfer(data, nullptr, nbBytes));
 
 	if (this->releaseMaster())
@@ -109,6 +155,8 @@ SX127x<SpiMaster, Cs>::read(Address addr, uint8_t *data, uint8_t nbBytes)
     Cs::reset();
 
     RF_CALL(SpiMaster::transfer(regAccess.value));
+=======
+>>>>>>> ab7826630a3154ef05ce6dbfee927579dcb5afca
     RF_CALL(SpiMaster::transfer(nullptr, data, nbBytes));
 
 	if (this->releaseMaster())

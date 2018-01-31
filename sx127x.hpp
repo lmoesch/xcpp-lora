@@ -44,6 +44,10 @@ public:
         PaConfig = 0x09,
     };
     typedef xpcc::Configuration<RegAccess_t, Address, 0x7F> Address_t;
+<<<<<<< HEAD
+=======
+
+>>>>>>> ab7826630a3154ef05ce6dbfee927579dcb5afca
 
     // -- Common Registers -----------------------------------------------------
 
@@ -131,6 +135,7 @@ public:
 	xpcc::ResumableResult<void>
 	initialize();
 
+<<<<<<< HEAD
     // -- Basic I/O ------------------------------------------------------------
 
     xpcc::ResumableResult<void>
@@ -158,6 +163,20 @@ public:
 private:
     RegAccess_t regAccess;
     Shared _shared = {0x00};
+=======
+        xpcc::ResumableResult<void>
+    write(Address addr, uint8_t data);
+
+    xpcc::ResumableResult<void>
+    write(Address addr, uint8_t *data, uint8_t nbBytes);
+
+    xpcc::ResumableResult<void>
+    read(Address addr, uint8_t *data, uint8_t nbBytes);
+
+private:
+    RegAccess_t regAccess;
+    RegOpMode_t operationMode;
+>>>>>>> ab7826630a3154ef05ce6dbfee927579dcb5afca
 };
 } // Namespace xpcc
 
