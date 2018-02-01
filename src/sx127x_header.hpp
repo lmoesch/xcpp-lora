@@ -7,9 +7,6 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef XPCC_SX127x_HPP
-#define XPCC_SX127x_HPP
-
 #include <xpcc/architecture/interface/spi_device.hpp>
 #include <xpcc/processing.hpp>
 
@@ -42,12 +39,13 @@ public:
         // -- RF Block Registers -----------------------------------------------
 
         PaConfig = 0x09,
+
+        // -- LoRa Page Registers ----------------------------------------------
+
+        ModemConfig1 = 0x1d,
+        ModemConfig2 = 0x1e,
     };
     typedef xpcc::Configuration<RegAccess_t, Address, 0x7F> Address_t;
-<<<<<<< HEAD
-=======
-
->>>>>>> ab7826630a3154ef05ce6dbfee927579dcb5afca
 
     // -- Common Registers -----------------------------------------------------
 
@@ -105,12 +103,75 @@ public:
 
     typedef xpcc::Value<RegPaRamp_t, 4, 0x00> PaRamp_t;
 
-    // --
+    // -- Modem Config 1
+    enum class
+    RegModemConfig1 : uint8_t
+    {
+        /// Switches between implicit (1) or explicit (0) header mode
+        ImplicitHeaderModeOn = Bit0
+    };
+    XPCC_FLAGS8(RegModemConfig1)
+
+    enum class
+    SignalBandwidth : uint8_t
+    {
+        Fr7_8kHz = 0,
+        Fr10_4kHz = Bit0,
+        Fr15_6kHz = Bit1,
+        Fr20_8kHz = Bit1 | Bit0,
+        Fr31_25kHz = Bit2,
+        Fr41_7kHz = Bit2 | Bit0,
+        Fr62_5kHz = Bit2 | Bit1,
+        Fr125kHz = Bit2 | Bit1 | Bit0,
+        Fr250kHz = Bit3,
+        Fr500kHz = Bit3 | Bit0 
+    };
+    typedef xpcc::Configuration<RegModemConfig1_t, SignalBandwidth, 0xf0> SignalBandwidth_t;
+
+    enum class
+    ErrorCodingRate : uint8_t
+    {
+        Cr4_5 = Bit0,
+        Cr4_6 = Bit1,
+        Cr4_7 = Bit1 | Bit0,
+        Cr4_8 = Bit2
+    };
+    typedef xpcc::Configuration<RegModemConfig1_t, ErrorCodingRate, 0x0e> ErrorCodingRate_t;
+
+    // -- Modem Config 2
+    enum class
+    RegModemConfig2 : uint8_t
+    {
+        /// Set either single package mode (0) or continuous mode (1)
+        TxContinuousMode = Bit3,
+
+        /// Enable (1) or disable (0) CRC check on payload
+        RxPayloadCrcOn = Bit2
+    };
+    XPCC_FLAGS8(RegModemConfig2)
+
+    enum class
+    SpreadingFactor : uint8_t
+    {
+        SF6 = 0x06,
+        SF7 = 0x07,
+        SF8 = 0x08,
+        SF9 = 0x09,
+        SF10 = 0x0a,
+        SF11 = 0x0b,
+        SF12 = 0x0c
+    };
+    typedef xpcc::Configuration<RegModemConfig2_t, SpreadingFactor, 0xf0> SpreadingFactor_t;
+    typedef xpcc::Value<RegModemConfig2_t, 2, 0x00>  SymbTimeoutMsb_t;
+
 
     // -- Register list --------------------------------------------------------
     union Shared {
         uint8_t value;
-        RegOpMode_t regOpMode;       
+        RegOpMode_t regOpMode;    
+        RegPaConfig_t regPaConfig; 
+        RegModemConfig1_t regModemConfig1;
+        RegModemConfig2_t RegModemConfig2; 
     };
 };
 
@@ -135,9 +196,17 @@ public:
 	xpcc::ResumableResult<void>
 	initialize();
 
-<<<<<<< HEAD
     // -- Basic I/O ------------------------------------------------------------
 
+    /**
+     *  Write access to specified SX127x register. 
+     *  
+     *  Writes exactly one byte of data to the register specified by it's 
+     *  address.
+     * 
+     *  @param addr Address of the register to write to.
+     *  @param data Databyte to write to the specified address.
+     */
     xpcc::ResumableResult<void>
     write(Address addr, uint8_t data);
 
@@ -151,35 +220,39 @@ public:
     xpcc::ResumableResult<void>
     setLora();
 
-    /*xpcc::ResumableResult<void>
-    setFSK();
+    //xpcc::ResumableResult<void>
+    //setFSK();
 
     xpcc::ResumableResult<void>
     setLowFrequencyMode();
 
+    //xpcc::ResumableResult<void>
+    //setHighFrequencyMode();
+
     xpcc::ResumableResult<void>
-    setHighFrequencyMode();*/
+    setCarrierFreq(uint8_t msb, uint8_t mid, uint8_t lsb);
+
+    xpcc::ResumableResult<void>
+    setPaBoost();
+
+    xpcc::ResumableResult<void>
+    setOutputPower(uint8_t power);
+
+    xpcc::ResumableResult<void>
+    setBandwidth(SignalBandwidth bw);
+
+    xpcc::ResumableResult<void>
+    setCodingRate(ErrorCodingRate cr);
+
+    xpcc::ResumableResult<void>
+    setImplicitHeaderMode();
+
+    xpcc::ResumableResult<void>
+    setExplicitHeaderMode();
+
 
 private:
     RegAccess_t regAccess;
     Shared _shared = {0x00};
-=======
-        xpcc::ResumableResult<void>
-    write(Address addr, uint8_t data);
-
-    xpcc::ResumableResult<void>
-    write(Address addr, uint8_t *data, uint8_t nbBytes);
-
-    xpcc::ResumableResult<void>
-    read(Address addr, uint8_t *data, uint8_t nbBytes);
-
-private:
-    RegAccess_t regAccess;
-    RegOpMode_t operationMode;
->>>>>>> ab7826630a3154ef05ce6dbfee927579dcb5afca
 };
 } // Namespace xpcc
-
-#include "sx127x_impl.hpp"
-
-#endif // XPCC_SX127x_HPP
