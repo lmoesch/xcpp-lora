@@ -42,8 +42,17 @@ public:
 
         // -- LoRa Page Registers ----------------------------------------------
 
+        FifoAddrPtr = 0x0d,
+        FifoTxBaseAddr = 0x0e,
+        FifoRxBaseAddr = 0x0f,
+        FifoRxCurrAddr = 0x10,
+        IrqFlagsMask = 0x11,
+        IrqFlags = 0x12,
+        RxNbBytes = 0x13,
+        HopChannel = 0x1c,
         ModemConfig1 = 0x1d,
         ModemConfig2 = 0x1e,
+        PayloadLength = 0x22
     };
     typedef xpcc::Configuration<RegAccess_t, Address, 0x7F> Address_t;
 
@@ -103,6 +112,38 @@ public:
 
     typedef xpcc::Value<RegPaRamp_t, 4, 0x00> PaRamp_t;
 
+    // -- Lora Page Registers --------------------------------------------------
+
+    // IRQ Flags Mask
+    enum class
+    RegIrqFlagsMask : uint8_t
+    {
+        RxTimeoutMask = Bit7,
+        RxDoneMask = Bit6,
+        PayloadCrcErrorMask = Bit5,
+        ValidHeaderMask = Bit4,
+        TxDoneMask = Bit3,
+        CadDoneMask = Bit2,
+        FhssChangeChannelMask = Bit1,
+        CadDetectedMask = Bit0
+    };
+    XPCC_FLAGS8(RegIrqFlagsMask)
+
+    // IRQ FLags
+    enum class
+    RegIrqFlags : uint8_t
+    {
+        RxTimeout = Bit7,
+        RxDone = Bit6,
+        PayloadCrcError = Bit5,
+        ValidHeader = Bit4,
+        TxDone = Bit3,
+        CadDone = Bit2,
+        FhssChangeChannel = Bit1,
+        CadDetected = Bit0
+    };
+    XPCC_FLAGS8(RegIrqFlags)
+
     // -- Modem Config 1
     enum class
     RegModemConfig1 : uint8_t
@@ -126,7 +167,7 @@ public:
         Fr250kHz = Bit3,
         Fr500kHz = Bit3 | Bit0 
     };
-    typedef xpcc::Configuration<RegModemConfig1_t, SignalBandwidth, 0xf0> SignalBandwidth_t;
+    typedef xpcc::Configuration<RegModemConfig1_t, SignalBandwidth, 0b1111, 0x04> SignalBandwidth_t;
 
     enum class
     ErrorCodingRate : uint8_t
@@ -136,7 +177,7 @@ public:
         Cr4_7 = Bit1 | Bit0,
         Cr4_8 = Bit2
     };
-    typedef xpcc::Configuration<RegModemConfig1_t, ErrorCodingRate, 0x0e> ErrorCodingRate_t;
+    typedef xpcc::Configuration<RegModemConfig1_t, ErrorCodingRate, 0b111, 0x01> ErrorCodingRate_t;
 
     // -- Modem Config 2
     enum class
@@ -161,7 +202,7 @@ public:
         SF11 = 0x0b,
         SF12 = 0x0c
     };
-    typedef xpcc::Configuration<RegModemConfig2_t, SpreadingFactor, 0xf0> SpreadingFactor_t;
+    typedef xpcc::Configuration<RegModemConfig2_t, SpreadingFactor, 0b1111, 0x04> SpreadingFactor_t;
     typedef xpcc::Value<RegModemConfig2_t, 2, 0x00>  SymbTimeoutMsb_t;
 
 
@@ -169,9 +210,11 @@ public:
     union Shared {
         uint8_t value;
         RegOpMode_t regOpMode;    
-        RegPaConfig_t regPaConfig; 
+        RegPaConfig_t regPaConfig;
+        RegIrqFlagsMask_t regIrqFlagsMask;
+        RegIrqFlags_t regIrqFlags; 
         RegModemConfig1_t regModemConfig1;
-        RegModemConfig2_t RegModemConfig2; 
+        RegModemConfig2_t regModemConfig2; 
     };
 };
 
@@ -230,6 +273,9 @@ public:
     //setHighFrequencyMode();
 
     xpcc::ResumableResult<void>
+    setOperationMode(Mode mode);
+
+    xpcc::ResumableResult<void>
     setCarrierFreq(uint8_t msb, uint8_t mid, uint8_t lsb);
 
     xpcc::ResumableResult<void>
@@ -250,6 +296,18 @@ public:
     xpcc::ResumableResult<void>
     setExplicitHeaderMode();
 
+    xpcc::ResumableResult<void>
+    enablePayloadCRC();
+
+    xpcc::ResumableResult<void>
+    setPayloadLength(uint8_t len);
+
+    // -- Send/Receive ---------------------------------------------------------
+    xpcc::ResumableResult<void>
+    getPayload(uint8_t *data, uint8_t nbBytes);
+
+    xpcc::ResumableResult<void>
+    sendPacket(uint8_t *data, uint8_t nbBytes);
 
 private:
     RegAccess_t regAccess;
