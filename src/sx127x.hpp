@@ -274,6 +274,23 @@ SX127x<SpiMaster, Cs>::setCodingRate(ErrorCodingRate cr)
 
 template <typename SpiMaster, typename Cs>
 ResumableResult<void>
+SX127x<SpiMaster, Cs>::setSpreadingFactor(SpreadingFactor sf)
+{
+    RF_BEGIN();
+
+    RF_CALL(read(Address::ModemConfig2, &((_shared.regModemConfig2).value), 1));
+
+    SpreadingFactor_t::set(_shared.regModemConfig2, sf);
+
+    RF_CALL(write(Address::ModemConfig2, _shared.regModemConfig2.value));
+
+    RF_END();
+};
+
+// ----------------------------------------------------------------------------
+
+template <typename SpiMaster, typename Cs>
+ResumableResult<void>
 SX127x<SpiMaster, Cs>::setImplicitHeaderMode()
 {
     RF_BEGIN();
@@ -308,6 +325,23 @@ SX127x<SpiMaster, Cs>::setExplicitHeaderMode()
 
 template <typename SpiMaster, typename Cs>
 ResumableResult<void>
+SX127x<SpiMaster, Cs>::setDio0Mapping(uint8_t map)
+{
+    RF_BEGIN();
+
+    RF_CALL(read(Address::DioMapping1, &((_shared.regDioMapping1).value), 1));
+
+    Dio0Mapping_t::set(_shared.regDioMapping1, map);
+
+    RF_CALL(write(Address::DioMapping1, _shared.regDioMapping1.value));
+
+    RF_END();
+};
+
+// ----------------------------------------------------------------------------
+
+template <typename SpiMaster, typename Cs>
+ResumableResult<void>
 SX127x<SpiMaster, Cs>::enablePayloadCRC()
 {
     RF_BEGIN();
@@ -332,6 +366,19 @@ SX127x<SpiMaster, Cs>::setPayloadLength(uint8_t len)
     RF_CALL(write(Address::PayloadLength, len));
 
     RF_END();
+};
+
+// ----------------------------------------------------------------------------
+
+template <typename SpiMaster, typename Cs>
+ResumableResult<bool>
+SX127x<SpiMaster, Cs>::getInterrupt(RegIrqFlags irq)
+{
+    RF_BEGIN();
+    
+    RF_CALL(read(Address::IrqFlags, &((_shared.regIrqFlags).value), 1));
+
+    RF_END_RETURN(_shared.regIrqFlags & irq);
 };
 
 // ----------------------------------------------------------------------------

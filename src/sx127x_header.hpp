@@ -52,7 +52,8 @@ public:
         HopChannel = 0x1c,
         ModemConfig1 = 0x1d,
         ModemConfig2 = 0x1e,
-        PayloadLength = 0x22
+        PayloadLength = 0x22,
+        DioMapping1 = 0x40
     };
     typedef xpcc::Configuration<RegAccess_t, Address, 0x7F> Address_t;
 
@@ -205,6 +206,14 @@ public:
     typedef xpcc::Configuration<RegModemConfig2_t, SpreadingFactor, 0b1111, 0x04> SpreadingFactor_t;
     typedef xpcc::Value<RegModemConfig2_t, 2, 0x00>  SymbTimeoutMsb_t;
 
+    // -- Dio Mapping 1
+    enum class
+    RegDioMapping1 : uint8_t
+    {};
+    XPCC_FLAGS8(RegDioMapping1)
+
+    typedef xpcc::Value<RegDioMapping1_t, 2, 0x06> Dio0Mapping_t;
+
 
     // -- Register list --------------------------------------------------------
     union Shared {
@@ -214,7 +223,8 @@ public:
         RegIrqFlagsMask_t regIrqFlagsMask;
         RegIrqFlags_t regIrqFlags; 
         RegModemConfig1_t regModemConfig1;
-        RegModemConfig2_t regModemConfig2; 
+        RegModemConfig2_t regModemConfig2;
+        RegDioMapping1_t regDioMapping1;
     };
 };
 
@@ -291,16 +301,25 @@ public:
     setCodingRate(ErrorCodingRate cr);
 
     xpcc::ResumableResult<void>
+    setSpreadingFactor(SpreadingFactor sf);
+
+    xpcc::ResumableResult<void>
     setImplicitHeaderMode();
 
     xpcc::ResumableResult<void>
     setExplicitHeaderMode();
 
     xpcc::ResumableResult<void>
+    setDio0Mapping(uint8_t map);
+
+    xpcc::ResumableResult<void>
     enablePayloadCRC();
 
     xpcc::ResumableResult<void>
     setPayloadLength(uint8_t len);
+
+    xpcc::ResumableResult<bool>
+    getInterrupt(RegIrqFlags irq);
 
     // -- Send/Receive ---------------------------------------------------------
     xpcc::ResumableResult<void>
